@@ -1,0 +1,19 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+    # Fetch source code
+    - name: Fetch source code
+      uses: actions/checkout@v2
+    # Build
+    - name: Build
+      run: |
+        cargo build
+    # Run tests
+    - name: run tests
+      run: |
+        cargo test
