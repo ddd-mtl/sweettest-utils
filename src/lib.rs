@@ -5,6 +5,9 @@ mod print;
 mod setup;
 mod try_zome_call;
 
+pub use holochain::sweettest::*;
+pub use holo_hash::*;
+pub use holochain::conductor::ConductorHandle;
 
 pub use print::*;
 pub use setup::*;
