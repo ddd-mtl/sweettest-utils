@@ -1,4 +1,5 @@
 #![allow(unused_doc_comments)]
+#![allow(non_upper_case_globals)]
 
 mod print;
 mod setup;

@@ -5,6 +5,7 @@ use holochain_zome_types::*;
 use holo_hash::*;
 use holochain_p2p::*;
 use colored::*;
+use crate::get_entry_names;
 
 
 ///
@@ -38,13 +39,15 @@ pub async fn get_zome_entry_names(conductor: &SweetConductor, cell: &SweetCell, 
 
 
 ///
-fn print_element(element: &SourceChainJsonElement, entry_names: &Vec<Vec<String>>) -> String {
+fn print_element(element: &SourceChainJsonElement) -> String {
    let mut str = format!("{:?} ", element.header.header_type());
    // let mut str = format!("({}) ", element.header_address);
 
    // if (element.header.header_type() == HeaderType::CreateLink) {
    //    str += &format!(" '{:?}'", element.header.tag());
    // }
+
+   let entry_names = get_entry_names();
 
    match &element.header {
       Header::CreateLink(create_link) => {
@@ -115,7 +118,6 @@ pub async fn print_chain(
    conductor: &SweetConductor,
    agent: &AgentPubKey,
    cell: &SweetCell,
-   entry_names: Vec<Vec<String>>,
 ) {
    let cell_id = cell.cell_id();
    let vault = conductor.get_authored_env(cell_id.dna_hash()).unwrap();
@@ -142,7 +144,7 @@ pub async fn print_chain(
 
    let mut count = 0;
    for element in &json_dump.elements {
-      let str = print_element(&element, &entry_names);
+      let str = print_element(&element);
       println!(" {:2}. {}", count, str);
       count += 1;
    }

@@ -2,9 +2,21 @@ use holochain::sweettest::*;
 use holochain::conductor::config::ConductorConfig;
 use holo_hash::*;
 use futures::future;
+use std::sync::Mutex;
+use once_cell::sync::Lazy;
 
 use crate::*;
 
+
+static g_entry_names: Lazy<Mutex<Vec<Vec<String>>>> = Lazy::new(|| Mutex::new(Vec::new()));
+
+pub fn get_entry_names() -> Vec<Vec<String>> {
+   g_entry_names.lock().unwrap().clone()
+}
+
+pub fn set_entry_names(entry_names: Vec<Vec<String>>) {
+   *g_entry_names.lock().unwrap() = entry_names;
+}
 
 ///
 pub fn create_network_config() -> ConductorConfig {
@@ -47,6 +59,12 @@ pub async fn setup_conductors(dna_filepath: &str, n: usize) -> (SweetConductorBa
       .setup_app_for_zipped_agents("app", &all_agents, &[dna])
       .await
       .unwrap();
+
+   println!("\n* RETRIEVING ENTRY NAMES...");
+   let cell1 = apps.iter().next().unwrap().clone().into_cells()[0].clone();
+   let all_entry_names = get_dna_entry_names(&conductors[0], &cell1).await;
+   set_entry_names(all_entry_names);
+
    println!("\n* EXCHANGING PEER INFO...");
    conductors.exchange_peer_info().await;
    println!("\n* CONDUCTORS SETUP DONE\n\n");
@@ -55,7 +73,7 @@ pub async fn setup_conductors(dna_filepath: &str, n: usize) -> (SweetConductorBa
 
 
 ///
-pub async fn setup_1_conductor(dna_filepath: &str) -> (SweetConductor, AgentPubKey, SweetCell, Vec<Vec<String>>) {
+pub async fn setup_1_conductor(dna_filepath: &str) -> (SweetConductor, AgentPubKey, SweetCell) {
    let dna = SweetDnaFile::from_bundle(std::path::Path::new(dna_filepath))
       .await
       .unwrap();
@@ -79,9 +97,9 @@ pub async fn setup_1_conductor(dna_filepath: &str) -> (SweetConductor, AgentPubK
    let cell1 = app1.into_cells()[0].clone();
 
    let all_entry_names = get_dna_entry_names(&conductor, &cell1).await;
-
+   set_entry_names(all_entry_names);
 
    println!("\n\n\n SETUP DONE\n\n");
 
-   (conductor, alex, cell1, all_entry_names)
+   (conductor, alex, cell1)
 }
