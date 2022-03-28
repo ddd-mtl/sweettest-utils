@@ -2,7 +2,6 @@ use holochain::conductor::*;
 use holochain::sweettest::*;
 use holochain_state::source_chain::*;
 use holochain_zome_types::*;
-use holo_hash::*;
 use holochain_p2p::*;
 use colored::*;
 use crate::get_entry_names;
@@ -116,7 +115,6 @@ fn print_element(element: &SourceChainJsonElement) -> String {
 ///
 pub async fn print_chain(
    conductor: &SweetConductor,
-   agent: &AgentPubKey,
    cell: &SweetCell,
 ) {
    let cell_id = cell.cell_id();
@@ -130,7 +128,7 @@ pub async fn print_chain(
       Some(cell_id.clone()),
    ).await.expect("p2p_store should not fail");
 
-   let json_dump = dump_state(vault.clone().into(), agent.clone()).await.unwrap();
+   let json_dump = dump_state(vault.clone().into(), cell.agent_pubkey().clone()).await.unwrap();
    //let json = serde_json::to_string_pretty(&json_dump).unwrap();
 
    if json_dump.elements.is_empty() {
@@ -140,7 +138,7 @@ pub async fn print_chain(
 
    let author = json_dump.elements[0].header.author().clone();
    println!("\n====== SOURCE-CHAIN STATE DUMP START ===== {}", author);
-   //println!("source_chain_dump({}) of {:?}", json_dump.elements.len(), agent);
+   //println!("source_chain_dump({}) of {:?}", json_dump.elements.len(), cell.agent_pubkey());
 
    let mut count = 0;
    for element in &json_dump.elements {

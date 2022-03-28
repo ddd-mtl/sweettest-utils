@@ -4,10 +4,13 @@
 mod print;
 mod setup;
 mod try_zome_call;
+mod sweeter_cell;
+
 
 pub use print::*;
 pub use setup::*;
 pub use try_zome_call::*;
+pub use sweeter_cell::*;
 
 //----------------------------------------------------------------------------------------
 
