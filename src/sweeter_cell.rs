@@ -1,6 +1,7 @@
 use holochain::sweettest::{SweetCell, SweetConductor};
 
 use std::sync::Arc;
+use holochain::conductor::api::error::{ConductorApiError, ConductorApiResult};
 use holochain_zome_types::AppSignal;
 use stream_cancel::{Trigger, Valve};
 
@@ -98,12 +99,12 @@ impl SweeterCell {
    }
 
    ///
-   pub async fn call_any_zome<I, O>(&self, zome_name: &str, fn_name: &str, payload: I) -> O
+   pub async fn call_any_zome<I, O>(&self, zome_name: &str, fn_name: &str, payload: I) -> ConductorApiResult<O>
       where
          I: serde::Serialize + std::fmt::Debug,
          O: serde::de::DeserializeOwned + std::fmt::Debug,
    {
-      return self.conductor.call(&self.cell.zome(zome_name), fn_name, payload).await;
+      return self.conductor.call_fallible(&self.cell.zome(zome_name), fn_name, payload).await;
    }
 
 
@@ -115,19 +116,24 @@ impl SweeterCell {
       fn_name: &str,
       payload: P,
       predicat: fn(res: &T) -> bool,
-   ) -> Result<T, ()>
+   ) -> ConductorApiResult<T>
       where
          T: serde::de::DeserializeOwned + std::fmt::Debug,
          P: Clone + serde::Serialize + std::fmt::Debug,
    {
       for _ in 0..10u32 {
-         let res: T = self.conductor.call(&self.cell.zome(zome_name), fn_name, payload.clone())
+         let res: ConductorApiResult<T> = self.conductor.call_fallible(&self.cell.zome(zome_name), fn_name, payload.clone())
                           .await;
-         if predicat(&res) {
-            return Ok(res);
+         match res {
+            Ok(value) => {
+               if predicat(&value) {
+                  return Ok(value);
+               }
+            },
+            Err(e) => return Err(e),
          }
          tokio::time::sleep(std::time::Duration::from_millis(2 * 1000)).await;
       }
-      Err(())
+      Err(ConductorApiError::other("predicat failed"))
    }
 }
