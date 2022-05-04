@@ -10,9 +10,9 @@ use crate::get_entry_names;
 ///
 pub async fn get_dna_entry_names(conductor: &SweetConductor, cell: &SweetCell) -> Vec<Vec<String>> {
    let first_dna_hash = conductor.handle().list_dnas()[0].clone();
-   let dna = conductor.handle().get_dna(&first_dna_hash).unwrap().clone();
+   let dna = conductor.handle().get_dna_def(&first_dna_hash).unwrap().clone();
    let mut all_entry_names = Vec::new();
-   for (zome_name, _zome_def) in dna.dna_def().zomes.iter() {
+   for (zome_name, _zome_def) in dna.zomes.iter() {
       let entry_names = get_zome_entry_names(&conductor, &cell, &zome_name.0).await;
       all_entry_names.push(entry_names);
    }
