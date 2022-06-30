@@ -13,6 +13,7 @@ pub async fn get_dna_entry_names(conductor: &SweetConductor, cell: &SweetCell) -
    let dna = conductor.handle().get_dna_def(&first_dna_hash).unwrap().clone();
    let mut all_entry_names = Vec::new();
    for (zome_name, _zome_def) in dna.zomes.iter() {
+      println!("Calling get_zome_entry_names({})...", zome_name);
       let entry_names = get_zome_entry_names(&conductor, &cell, &zome_name.0).await;
       all_entry_names.push(entry_names);
    }
@@ -25,7 +26,7 @@ pub async fn get_zome_entry_names(conductor: &SweetConductor, cell: &SweetCell, 
    let entry_defs: EntryDefsCallbackResult = conductor.call(&cell.zome(zome_name), "entry_defs", ()).await;
    let EntryDefsCallbackResult::Defs(defs) = entry_defs;
    for entry_def in defs.clone() {
-      //println!("entry_def: {:?}", entry_def);
+      println!("entry_def: {:?}", entry_def);
       let name = match entry_def.id {
          EntryDefId::App(name) => name,
          EntryDefId::CapClaim => "CapClaim".to_string(),
