@@ -118,11 +118,11 @@ pub async fn print_chain(
    cell: &SweetCell,
 ) {
    let cell_id = cell.cell_id();
-   let vault = conductor.get_authored_env(cell_id.dna_hash()).unwrap();
+   let vault = conductor.get_authored_db(cell_id.dna_hash()).unwrap();
 
-   let space = cell_id.dna_hash().to_kitsune();
+   //let space = cell_id.dna_hash().to_kitsune();
 
-   let env = conductor.get_p2p_env(space);
+   let env = conductor.get_p2p_db(cell_id.dna_hash());
    let _peer_dump = p2p_agent_store::dump_state(
       env.into(),
       Some(cell_id.clone()),
@@ -155,8 +155,8 @@ pub async fn print_chain(
 ///
 pub async fn print_peers(conductor: &SweetConductor, cell: &SweetCell) {
    let cell_id = cell.cell_id();
-   let space = cell_id.dna_hash().to_kitsune();
-   let env = conductor.get_p2p_env(space);
+   //let space = cell_id.dna_hash().to_kitsune();
+   let env = conductor.get_p2p_db(cell_id.dna_hash());
    let peer_dump = p2p_agent_store::dump_state(
       env.into(),
       Some(cell_id.clone()),
