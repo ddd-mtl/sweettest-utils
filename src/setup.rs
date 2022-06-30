@@ -74,6 +74,7 @@ pub async fn setup_conductors(dna_filepath: &str, n: usize) -> (SweetConductorBa
 
 ///
 pub async fn setup_1_conductor(dna_filepath: &str) -> (SweetConductor, AgentPubKey, SweetCell) {
+   println!("Called setup_1_conductor()");
    let dna = SweetDnaFile::from_bundle(std::path::Path::new(dna_filepath))
       .await
       .unwrap();
@@ -87,8 +88,8 @@ pub async fn setup_1_conductor(dna_filepath: &str) -> (SweetConductor, AgentPubK
 
    /// Standard config
    let mut conductor = SweetConductor::from_standard_config().await;
-
    let alex = SweetAgents::one(conductor.keystore()).await;
+   println!("Calling setup_app_for_agent()...");
    let app1 = conductor
       .setup_app_for_agent("app", alex.clone(), &[dna.clone()])
       .await
@@ -96,7 +97,9 @@ pub async fn setup_1_conductor(dna_filepath: &str) -> (SweetConductor, AgentPubK
 
    let cell1 = app1.into_cells()[0].clone();
 
+   println!("Calling get_dna_entry_names()...");
    let all_entry_names = get_dna_entry_names(&conductor, &cell1).await;
+   println!("Calling set_entry_names()...");
    set_entry_names(all_entry_names);
 
    println!("\n\n\n SETUP DONE\n\n");

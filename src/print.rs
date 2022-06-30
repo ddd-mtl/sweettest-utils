@@ -2,7 +2,7 @@ use holochain::conductor::*;
 use holochain::sweettest::*;
 use holochain_state::source_chain::*;
 use holochain_zome_types::*;
-use holochain_p2p::*;
+//use holochain_p2p::*;
 use colored::*;
 use crate::get_entry_names;
 
