@@ -16,9 +16,9 @@ once_cell = { version = "1.10", default-features = false }
 stream-cancel = { version = "0.8.0", default-features = false }
 
 
-holochain = { version = "0.0.143", default-features = false, features = ["test_utils"]  }
-holochain_types = { version = "0.0.41", default-features = false }
-holochain_zome_types = { version = "0.0.35", default-features = false }
-holochain_state = { version = "0.0.43", default-features = false }
-holochain_p2p = { version = "0.0.41", default-features = false }
-holo_hash = { version = "0.0.27", default-features = false, features = ["encoding"] }
+holochain = { version = "0.0.141", default-features = false, features = ["test_utils"]  }
+holochain_types = { version = "0.0.39", default-features = false }
+holochain_zome_types = { version = "0.0.34", default-features = false }
+holochain_state = { version = "0.0.41", default-features = false }
+holochain_p2p = { version = "0.0.39", default-features = false }
+holo_hash = { version = "0.0.26", default-features = false, features = ["encoding"] }
