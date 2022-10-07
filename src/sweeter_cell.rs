@@ -2,7 +2,7 @@ use holochain::sweettest::{SweetCell, SweetConductor};
 
 use std::sync::Arc;
 use holochain::conductor::api::error::{ConductorApiError, ConductorApiResult};
-use holochain_zome_types::AppSignal;
+//use holochain_zome_types::AppSignal;
 use stream_cancel::{Trigger, Valve};
 
 use tokio::sync::Mutex;

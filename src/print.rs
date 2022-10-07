@@ -2,7 +2,6 @@ use holochain::conductor::*;
 use holochain::sweettest::*;
 use holochain_state::source_chain::*;
 use holochain_zome_types::*;
-//use holochain_p2p::*;
 use colored::*;
 use crate::get_entry_names;
 
@@ -12,23 +11,28 @@ pub async fn get_dna_entry_names(conductor: &SweetConductor, cell: &SweetCell) -
    let first_dna_hash = conductor.handle().list_dnas()[0].clone();
    let dna = conductor.handle().get_dna_def(&first_dna_hash).unwrap().clone();
    let mut all_entry_names = Vec::new();
-   for (zome_name, _zome_def) in dna.zomes.iter() {
-      println!("Calling get_zome_entry_names({})...", zome_name);
+   for (zome_name, _zome_def) in dna.integrity_zomes.iter() {
+      let entry_names = get_zome_entry_names(&conductor, &cell, &zome_name.0).await;
+      all_entry_names.push(entry_names);
+   }
+   for (zome_name, _zome_def) in dna.coordinator_zomes.iter() {
       let entry_names = get_zome_entry_names(&conductor, &cell, &zome_name.0).await;
       all_entry_names.push(entry_names);
    }
    all_entry_names
 }
 
+
 ///
 pub async fn get_zome_entry_names(conductor: &SweetConductor, cell: &SweetCell, zome_name: &str) -> Vec<String> {
+   println!("Calling get_zome_entry_names({})...", zome_name);
    let mut entry_names = Vec::new();
    let entry_defs: EntryDefsCallbackResult = conductor.call(&cell.zome(zome_name), "entry_defs", ()).await;
    let EntryDefsCallbackResult::Defs(defs) = entry_defs;
    for entry_def in defs.clone() {
       println!("entry_def: {:?}", entry_def);
       let name = match entry_def.id {
-         EntryDefId::App(name) => name,
+         EntryDefId::App(name) => name.to_string(),
          EntryDefId::CapClaim => "CapClaim".to_string(),
          EntryDefId::CapGrant => "CapGrant".to_string(),
       };
@@ -39,9 +43,8 @@ pub async fn get_zome_entry_names(conductor: &SweetConductor, cell: &SweetCell, 
 
 
 ///
-fn print_element(element: &SourceChainJsonElement) -> String {
-   let mut str = format!("{:?} ", element.header.header_type());
-   // let mut str = format!("({}) ", element.header_address);
+fn print_record(record: &SourceChainJsonRecord) -> String {
+   let mut str = format!("{:?} ", record.action.action_type());
 
    // if (element.header.header_type() == HeaderType::CreateLink) {
    //    str += &format!(" '{:?}'", element.header.tag());
@@ -49,13 +52,13 @@ fn print_element(element: &SourceChainJsonElement) -> String {
 
    let entry_names = get_entry_names();
 
-   match &element.header {
-      Header::CreateLink(create_link) => {
+   match &record.action {
+      Action::CreateLink(create_link) => {
          // let s = std::str::from_utf8(&create_link.tag.0).unwrap();
          let s = String::from_utf8_lossy(&create_link.tag.0).to_string();
          str += &format!("'{:.20}'", s).yellow().to_string();
       },
-      Header::Create(create_entry) => {
+      Action::Create(create_entry) => {
          let mut s = String::new();
          match &create_entry.entry_type {
             EntryType::App(app_entry_type) => {
@@ -78,7 +81,7 @@ fn print_element(element: &SourceChainJsonElement) -> String {
          };
          str += &s;
       },
-      Header::Update(update_entry) => {
+      Action::Update(update_entry) => {
          let mut s = String::new();
          match &update_entry.entry_type {
             EntryType::App(app_entry_type) => {
@@ -95,18 +98,18 @@ fn print_element(element: &SourceChainJsonElement) -> String {
          };
          str += &s.yellow().to_string();
       },
-      Header::DeleteLink(delete_link) => {
+      Action::DeleteLink(delete_link) => {
          let s = format!("{}", delete_link.link_add_address);
          str += &format!("'{:.25}'", s).yellow().to_string();
       },
-      Header::Delete(delete_entry) => {
+      Action::Delete(delete_entry) => {
          let s = format!("{}", delete_entry.deletes_address);
          str += &format!("'{:.25}'", s).green().to_string();
       }
       _ => {},
    }
-   let mut line = format!("{:<40} ({}) ({:?})", str, element.header_address, element.header.entry_hash());
-   if element.header.is_genesis() {
+   let mut line = format!("{:<40} ({}) ({:?})", str, record.action_address, record.action.entry_hash());
+   if record.action.is_genesis() {
       line = line.blue().to_string();
    }
    line
@@ -132,24 +135,24 @@ pub async fn print_chain(
    let json_dump = dump_state(vault.clone().into(), cell.agent_pubkey().clone()).await.unwrap();
    //let json = serde_json::to_string_pretty(&json_dump).unwrap();
 
-   if json_dump.elements.is_empty() {
+   if json_dump.records.is_empty() {
       println!("\n\n>>>>>> SOURCE-CHAIN EMPTY <<<<<<\n\n");
       return;
    }
 
-   let author = json_dump.elements[0].header.author().clone();
+   let author = json_dump.records[0].action.author().clone();
    println!("\n====== SOURCE-CHAIN STATE DUMP START ===== {}", author);
-   //println!("source_chain_dump({}) of {:?}", json_dump.elements.len(), cell.agent_pubkey());
+   //println!("source_chain_dump({}) of {:?}", json_dump.records.len(), cell.agent_pubkey());
 
    let mut count = 0;
-   for element in &json_dump.elements {
-      let str = print_element(&element);
+   for element in &json_dump.records {
+      let str = print_record(&element);
       println!(" {:2}. {}", count, str);
       count += 1;
    }
 
    println!("====== SOURCE-CHAIN STATE DUMP END  ===== {} / {}\n",
-            json_dump.elements.len(), json_dump.published_ops_count);
+            json_dump.records.len(), json_dump.published_ops_count);
 }
 
 
