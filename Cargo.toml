@@ -1,9 +1,10 @@
 [package]
 name = "sweettest_utils"
-version = "0.0.165"
+version = "0.1.0-beta.1.0"
 description = "Helper functions for writing tests with Holochain's sweettest"
 license = "CAL-1.0"
 edition = "2021"
+rust-version = "1.65.0"
 
 [lib]
 name = "sweettest_utils"
@@ -13,13 +14,13 @@ crate-type = [ "cdylib", "rlib" ]
 serde = { version = "1.0", default-features = false }
 colored = { version = "2.0", default-features = false }
 futures = { version = "0.3", default-features = false }
-tokio = { version = "1.3", features = [ "full" ] }
-once_cell = { version = "1.10", default-features = false }
+tokio = { version = "1.17", features = [ "full" ] }
+once_cell = { version = "1.13", default-features = false }
 stream-cancel = { version = "0.8.0", default-features = false }
 
 
-holochain = { version = "0.0.165", features = ["test_utils"] }
-holochain_types = { version = "0.0.59", default-features = false }
-holochain_zome_types = { version = "0.0.50", default-features = false }
-holochain_state = { version = "0.0.62", default-features = false }
-holo_hash = { version = "0.0.33", default-features = false, features = ["encoding"] }
+holochain = { version = "=0.1.0", features = ["test_utils"] }
+holochain_types = { version = "=0.1.0", default-features = false }
+holochain_zome_types = { version = "=0.1.0", default-features = false }
+holochain_state = { version = "=0.1.0", default-features = false }
+holo_hash = { version = "=0.1.0", default-features = false, features = ["encoding"] }

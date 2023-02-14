@@ -43,11 +43,11 @@ impl SweeterCell {
       let jh = tokio::task::spawn({
          let clone = Arc::clone(&app_signals);
          async move {
-            while let Some(Signal::App(_, app_signal)) = stream.next().await {
+            while let Some(Signal::App {cell_id, zome_name, signal}) = stream.next().await {
                //let signal: SignalProtocol = app_signal.into_inner().decode().unwrap();
                //println!("\n SIGNAL RECEIVED: {:?}\n\n", signal);
                let mut v = clone.lock().await;
-               v.push(app_signal);
+               v.push(signal);
             }
          }
       });
